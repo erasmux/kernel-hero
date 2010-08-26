@@ -225,6 +225,25 @@ static void enable_adb(struct android_dev *dev, int enable)
 		if (dev->cdev)
 			dev->cdev->desc.idProduct = device_desc.idProduct;
 
+#ifdef CONFIG_USB_ANDROID_RNDIS
+		/* We need to specify the COMM class in the device descriptor
+		* if we are using RNDIS.
+		*/
+		if (!strcmp(f->name, "rndis")) {
+		if (enable)
+#ifdef CONFIG_USB_FUNCTION_RNDIS_WCEIS
+			dev->cdev->desc.bDeviceClass = USB_CLASS_WIRELESS_CONTROLLER;
+#else
+			dev->cdev->desc.bDeviceClass = USB_CLASS_COMM;
+#endif
+			else
+				dev->cdev->desc.bDeviceClass = USB_CLASS_PER_INTERFACE;
+		}
+#endif
+
+
+
+
 		/* force reenumeration */
 		if (dev->cdev && dev->cdev->gadget &&
 				dev->cdev->gadget->speed != USB_SPEED_UNKNOWN) {
